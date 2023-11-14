@@ -1,24 +1,20 @@
 const mongoose = require('mongoose');
 
-const uploadSchema = new mongoose.Schema({
+const commentSchema = new mongoose.Schema({
     username:{
         type:String,
         required:true
     },
-    desc:{
+    comment:{
         type: String,
         required: true
     },
-    img:{
-        type: JSON,
-        required: true
-    },
-    id:{
+    imgId:{
         type: String,
         required: true
     }
 });
 
-  const Upload = mongoose.model('Upload', uploadSchema)
+  const Comment = mongoose.model('Comment', commentSchema)
 
-  module.exports = Upload;
+  module.exports = Comment;

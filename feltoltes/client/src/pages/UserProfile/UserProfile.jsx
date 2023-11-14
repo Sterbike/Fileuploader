@@ -11,13 +11,25 @@ const UserProfile = () => {
     const [savedUser, setSavedUser] = useState(null);
     const [isChangingPassword, setIsChangingPassword] = useState(false); // Hozzáfűztük a jelszóváltoztatás állapotot
     const [userUploads, setUserUploads] = useState([]);
+    const [pfp, setpfp] = useState('');
 
     useEffect(() => {
         const userData = JSON.parse(localStorage.getItem('userData'));
         if (userData) {
           setSavedUser(userData);
+          getUserData(userData.username)
         }
       }, []);
+
+      const getUserData = async (username) => {
+        try {
+          const response = await axios.get(`http://localhost:3500/getUserData/${username}`);
+          const { user } = response.data;
+          setSavedUser(user)
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      };
 
       const handleSaveEdit = async (editedUser) => {
         try {
@@ -46,6 +58,44 @@ const UserProfile = () => {
         setIsChangingPassword(false);
       };
 
+      const deleteImageHandler = async (uploadId) => {
+        let confirmDelete = window.confirm("Biztosan törölni szeretnéd a képet?")
+        if (confirmDelete){
+          try {
+              const response = await axios.delete(`http://localhost:3500/uploads/${uploadId}`);
+              console.log(uploadId);
+              console.log(response.data); // handle the response as needed
+              setUserUploads((prevUploads) => prevUploads.filter((upload) => upload.id !== uploadId));
+          } catch (error) {
+              console.error("Error while deleting upload:", error);
+          }
+        }
+    };
+
+    
+    const setPfp = async (imgUrl) => {
+      try {
+          const response = await axios.put(`http://localhost:3500/updateUser/${savedUser.username}`, {
+              pfp: imgUrl // Assuming the backend expects 'pfp' field to be updated
+          });
+  
+          if (response.status === 200) {
+              
+              console.log('Profile picture updated successfully');
+              setpfp(imgUrl)
+          } else {
+              console.error('An error occurred while updating the profile picture.');
+          }
+      } catch (error) {
+          console.error('An error occurred:', error);
+      }
+    };
+
+    const viewImage = (ImageId) =>{
+      console.log(ImageId);
+      navigate(`/ImagePage/${ImageId}`)
+  }
+
       useEffect(() => {
         const fetchUserUploads = async () => {
             try {
@@ -58,6 +108,7 @@ const UserProfile = () => {
 
         if (savedUser) {
             fetchUserUploads();
+            setpfp(savedUser.pfp)
         }
     }, [savedUser]);
 
@@ -69,6 +120,7 @@ const UserProfile = () => {
             <Fragment>
             {savedUser || user ? (
                 <div>
+                  <img src={pfp} alt="User profile picture" id='userpfp' className='userpfp' />
                     <h1>Profil</h1>
                     <table>
                         <tr>
@@ -92,16 +144,26 @@ const UserProfile = () => {
             </Fragment>
         )}
         <div className='userimages'>
-            <h2>Feltöltött képek</h2>
+          <hr />
+            <h2>Feltöltött képek:</h2>
               <div className='images'>
               {userUploads.map((upload) => (
-                <div key={upload._id}>
-                  <img src={upload.img} alt={`Uploaded by ${upload.username}`} />
-                  <p>{upload.desc}</p>
+                <div className='image' key={upload._id}>
+                  <img onClick={() => viewImage(upload.id)} src={upload.img.cdnUrl} alt={`${upload.desc}`} />
+                  <div className='image-desc'>
+                    <p className='userprofile-desc'>{upload.desc}</p>
+                  </div>
+                  <div className="imagebuttons">
+                    <button onClick={()=>{deleteImageHandler(upload.id)}} className="delete">Törlés</button>
+                    <button className="setpfp" onClick={()=>{setPfp(upload.img.cdnUrl)}}>
+                      <img src="/img/add-photo.png"  alt="" />
+                    </button>
+                  </div>
+                  
                 </div>
               ))}
             </div>
-          </div>
+        </div>
     </div>
   )
 }

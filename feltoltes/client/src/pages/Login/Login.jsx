@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState('');
+    const [emailOrUsername, setEmailOrUsername] = useState('');
     const [password, setPassword] = useState('');
-    const isLoggedIn = localStorage.getItem("isLoggedIn")
+
     
     async function goToRegister(){
         navigate("/register")
@@ -15,7 +15,7 @@ const Login = () => {
     async function submit(e) {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3500/login', { email, password });
+            const response = await axios.post('http://localhost:3500/login', { emailOrUsername, password });
             if (response.status === 200) {
                 localStorage.setItem('isLoggedIn', 'true')
                 localStorage.setItem('userData', JSON.stringify(response.data.user));
@@ -38,9 +38,9 @@ const Login = () => {
   return (
     <div className='login-register-container'>
          <div class="form-container">
-            <p class="title">Bejelentkezés!</p>
+            <p class="title">Bejelentkezés</p>
             <form class="form-login">
-                <input type="email" class="input" placeholder="Email" onChange={(e) => {setEmail(e.target.value)}}/>
+                <input type="email" class="input" placeholder="Email cím vagy felhasználónév" onChange={(e) => {setEmailOrUsername(e.target.value)}}/>
                 <input type="password" class="input" placeholder="Jelszó" onChange={(e) => {setPassword(e.target.value)}}/>
                 <p class="page-link">
                 <span class="page-link-label">Elfelejtett jelszó?</span>

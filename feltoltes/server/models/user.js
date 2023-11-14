@@ -12,8 +12,13 @@ const userSchema = new mongoose.Schema({
     email:{
         type: String,
         required: true
+    },
+    pfp: {
+        type: String,
+        required: false,
+        default:"https://www.nicepng.com/png/detail/933-9332131_profile-picture-default-png.png"
     }
-  });
+});
 
   const User = mongoose.model('User', userSchema)
 

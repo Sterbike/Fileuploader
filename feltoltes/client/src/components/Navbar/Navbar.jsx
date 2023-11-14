@@ -6,20 +6,24 @@ import { useNavigate } from 'react-router-dom';
 const Navbar = () => {
   const [isInputVisible, setIsInputVisible] = useState(false);
   const userData = JSON.parse(localStorage.getItem('userData'));
-  const isLoggedIn = localStorage.getItem("isLoggedIn")
+  const [lightmode, setLightmode] = useState(localStorage.getItem("lightmode") || true);
+  let isLoggedIn = localStorage.getItem("isLoggedIn")
+  
 
   const navigate = useNavigate();
   const inputRef = useRef(null);
 
   useEffect(() => {
+    isLoggedIn = localStorage.getItem("isLoggedIn")
     const handleClickOutside = (event) => {
       if (inputRef.current && !inputRef.current.contains(event.target)) {
         setIsInputVisible(false);
       }
     };
 
-    document.addEventListener('click', handleClickOutside);
 
+
+    document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
@@ -33,22 +37,38 @@ const Navbar = () => {
     navigate("/userprofile");
   }
 
+  const lightModeSwitch = () => {
+    setLightmode((prevLightmode) => !prevLightmode);
+    console.log(lightmode);
+  };
+
+  useEffect(() => {
+    localStorage.setItem("lightmode", lightmode);
+    document.documentElement.className = lightmode ? "App-light" :"App-dark"
+  }, [lightmode]);
+
   return (
-    <div className='navbar-container'>
-      <div className="navbar">
-          {isLoggedIn ? (
-            <Fragment>
-              <Link to={"/main"} id='main'><a>Főoldal</a></Link>
-              <Link to={"/userprofile"} id='adatlap'><a>Adatlap</a></Link>
-              <div className='login-container' ref={inputRef}>
-                <Link to={"/signoutconfirm"} id='signout'><a>Kijelentkezés</a></Link>
-              </div>
-            </Fragment>
-          ) : (
-            null
-            )}
-      </div>
-    </div>
+    <Fragment>
+      {isLoggedIn ? (
+        <div className='navbar-container'>
+          <div className="navbar">
+                <Fragment>
+                  <Link to={"/main"} id='main'>Főoldal</Link>
+                  <Link to={"/userprofile"} id='adatlap'>Adatlap</Link>
+                  <div className='login-container' ref={inputRef}>
+                    <Link to={"/signoutconfirm"} id='signout'>Kijelentkezés</Link>
+                      <label class="switch">
+                        <input onClick={lightModeSwitch} type="checkbox" />
+                        <span class="slider"></span>
+                      </label>
+                  </div>
+                </Fragment>
+          </div>
+        </div>
+      ) : (
+        null
+      )}
+    </Fragment>
   );
 };
 
